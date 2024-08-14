@@ -70,9 +70,10 @@ object Variables {
         findScope(key).scope.data.remove(key)
     }
 
-    private fun findScope(variable: String) = scope.findOrCurrent {
-        it.data.containsKey(variable)
-    }
+    @JvmStatic
+    @Synchronized
+    fun findScope(variable: String) =
+        scope.findOrCurrent { it.data.containsKey(variable) }
 
     private fun createRootScope() =
         Scope<VariableMap>(null, HashMap()).apply {
