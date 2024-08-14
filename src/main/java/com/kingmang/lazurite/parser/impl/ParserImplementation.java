@@ -15,7 +15,7 @@ import com.kingmang.lazurite.parser.tokens.TokenType;
 import com.kingmang.lazurite.patterns.Pattern;
 import com.kingmang.lazurite.patterns.VariablePattern;
 import com.kingmang.lazurite.runtime.UserDefinedFunction;
-import com.kingmang.lazurite.runtime.values.LzrEnum;
+import com.kingmang.lazurite.runtime.values.LzrMap;
 import com.kingmang.lazurite.runtime.values.LzrNumber;
 import com.kingmang.lazurite.runtime.values.LzrString;
 import lombok.Getter;
@@ -38,10 +38,9 @@ public final class ParserImplementation implements IParser, IFileInfoProvider {
 
     private static final Token EOF = new Token(TokenType.EOF, "", -1, -1);
     private final Map<String, Integer> macros;
-    private static final EnumMap<TokenType, BinaryExpression.Operator> ASSIGN_OPERATORS;
+    private static final EnumMap<TokenType, BinaryExpression.Operator> ASSIGN_OPERATORS = new EnumMap<>(TokenType.class);
 
     static {
-        ASSIGN_OPERATORS = new EnumMap<>(TokenType.class);
         ASSIGN_OPERATORS.put(TokenType.PLUSEQ, BinaryExpression.Operator.ADD);
         ASSIGN_OPERATORS.put(TokenType.MINUSEQ, BinaryExpression.Operator.SUBTRACT);
         ASSIGN_OPERATORS.put(TokenType.STAREQ, BinaryExpression.Operator.MULTIPLY);
@@ -278,14 +277,14 @@ public final class ParserImplementation implements IParser, IFileInfoProvider {
 
     private Statement enums() {
         String name = consume(TokenType.WORD).getText();
-        Map<String, LzrString> enums = new HashMap<>();
+        LzrMap enums = new LzrMap(1);
         consume(TokenType.LBRACE);
         while (!(match(TokenType.RBRACE))) {
             String en = consume(TokenType.WORD).getText();
             match(TokenType.COMMA);
-            enums.put(en, new LzrString(en));
+            enums.set(en, new LzrString(en));
         }
-        return new AssignmentStatement(name, new ValueExpression(new LzrEnum(enums)));
+        return new AssignmentStatement(name, new ValueExpression(enums));
     }
 
     private Statement forStatement() {
